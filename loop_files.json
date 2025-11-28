@@ -1,0 +1,18 @@
+[
+	{
+	"url":"lokesh-sivakumar/de_airlines/refs/heads/main/DimAirline.csv",
+	"file":"DimAirline.csv"
+	},
+	{
+	"url":"lokesh-sivakumar/de_airlines/refs/heads/main/DimAirport.json",
+	"file":"DimAirport.json"
+	},
+	{
+	"url":"lokesh-sivakumar/de_airlines/refs/heads/main/DimFlight.csv",
+	"file":"DimFlight.csv"
+	},
+	{
+	"url":"lokesh-sivakumar/de_airlines/refs/heads/main/DimPassenger.csv",
+	"file":"DimPassenger.csv"
+	}
+]
