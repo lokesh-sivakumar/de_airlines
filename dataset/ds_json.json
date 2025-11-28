@@ -1,0 +1,21 @@
+{
+	"name": "ds_json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_git",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "lokesh-sivakumar/de_airlines/refs/heads/main/loop_files.json",
+					"type": "Expression"
+				}
+			}
+		},
+		"schema": {}
+	}
+}

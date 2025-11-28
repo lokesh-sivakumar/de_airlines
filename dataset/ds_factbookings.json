@@ -1,0 +1,20 @@
+{
+	"name": "ds_factbookings",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dls",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "sql",
+				"fileSystem": "bronze"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
