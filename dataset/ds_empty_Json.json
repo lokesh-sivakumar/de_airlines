@@ -1,0 +1,22 @@
+{
+	"name": "ds_empty_Json",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dls",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "empty.json",
+				"folderPath": "checkpoint/empty",
+				"fileSystem": "bronze"
+			}
+		},
+		"schema": {
+			"type": "object"
+		}
+	}
+}
