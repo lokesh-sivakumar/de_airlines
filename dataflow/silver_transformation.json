@@ -40,7 +40,43 @@
 					"name": "FactBookings"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "ls_dls",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkdimairline"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_dls",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkdimflight"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_dls",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkdimpasssenger"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_dls",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkfactbooking"
+				},
+				{
+					"linkedService": {
+						"referenceName": "ls_dls",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkdimairport"
+				}
+			],
 			"transformations": [
 				{
 					"name": "dccountry"
@@ -68,6 +104,30 @@
 				},
 				{
 					"name": "castcost"
+				},
+				{
+					"name": "dcairportname"
+				},
+				{
+					"name": "alterdimairline"
+				},
+				{
+					"name": "alterdimflight"
+				},
+				{
+					"name": "alterdimpassenger"
+				},
+				{
+					"name": "alterdimairport"
+				},
+				{
+					"name": "alterfactbookings"
+				},
+				{
+					"name": "castairportid"
+				},
+				{
+					"name": "selectairportid"
 				}
 			],
 			"scriptLines": [
@@ -98,7 +158,13 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> DimPassenger",
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          {    airport_id} as short,",
+				"          airport_name as string,",
+				"          city as string,",
+				"          country as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> DimAirport",
 				"source(output(",
@@ -143,7 +209,120 @@
 				"FactBookings cast(output(",
 				"          ticket_cost as integer '000'",
 				"     ),",
-				"     errors: true) ~> castcost"
+				"     errors: true) ~> castcost",
+				"DimAirport derive(airport_name = lower(airport_name)) ~> dcairportname",
+				"dccountry alterRow(upsertIf(1>0)) ~> alterdimairline",
+				"selectcols alterRow(upsertIf(1>0)) ~> alterdimflight",
+				"dcfirstname alterRow(upsertIf(1>0)) ~> alterdimpassenger",
+				"selectairportid alterRow(upsertIf(1>0)) ~> alterdimairport",
+				"castcost alterRow(upsertIf(1>0)) ~> alterfactbookings",
+				"dcairportname cast(output(",
+				"          {    airport_id} as integer",
+				"     ),",
+				"     errors: true) ~> castairportid",
+				"castairportid select(mapColumn(",
+				"          airport_id = {    airport_id},",
+				"          airport_name,",
+				"          city,",
+				"          country",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectairportid",
+				"alterdimairline sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'DimAirline',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['airline_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkdimairline",
+				"alterdimflight sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'DimFlight',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['flight_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkdimflight",
+				"alterdimpassenger sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'DimPassenger',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['passenger_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkdimpasssenger",
+				"alterfactbookings sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'FactBookings',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['booking_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkfactbooking",
+				"alterdimairport sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'silver',",
+				"     folderPath: 'DimAirport',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['    airport_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkdimairport"
 			]
 		}
 	}
